@@ -504,17 +504,27 @@ v.moveToBeginning(); m.moveToBeginning(); pb.moveToBeginning();
 v.trackMatteType = TrackMatteType.ALPHA; m.enabled = false;
 
 // ───────── OVERLAYS sobre a tela cheia ─────────
-function pillText(str, x, y, w, tin, tout) {
-  var pbx = S(c, x, y, "Pill fundo"); var pgx = G(pbx); aRect(pgx, w, 110, 55); fill(pgx, BG, 88); var pgy = G(pbx); aRect(pgy, w, 110, 55); strk(pgy, CY, 4);
+// SELO centralizado: ícone-círculo + pílula. NUNCA posicione pílula/ícone/texto com x fixo nem largura chutada:
+// a largura da pílula vem do tamanho do texto e o CONJUNTO (ícone + pílula) é centralizado em W/2.
+// icon = precomp (círculo de 250 px num comp de 400) ou null (pílula só com texto); iS = escala do ícone em % (padrão 62).
+function selo(str, y, tin, tout, icon, iS, size) {
+  size = size || 44;
+  var tw = Math.round(str.length * size * 0.56);          // largura estimada do texto (Inter Bold ≈ 0.56 em)
+  var pad = 56, gap = 24;                                  // respiro à direita / entre ícone e texto
+  var iD = icon ? 250 * (iS || 62) / 100 : 0;              // diâmetro do círculo do ícone
+  var lead = icon ? iD / 2 + gap : pad;                    // espaço do lado esquerdo da pílula até o texto
+  var pw = lead + tw + pad;                                // largura da pílula
+  var total = icon ? iD / 2 + pw : pw;                     // largura do conjunto
+  var pl = icon ? W / 2 - total / 2 + iD / 2 : W / 2 - total / 2;   // borda esquerda da pílula (= centro do ícone)
+  var pbx = S(c, pl + pw / 2, y, "Selo fundo"); var pgx = G(pbx); aRect(pgx, pw, 110, 55); fill(pgx, BG, 88); var pgy = G(pbx); aRect(pgy, pw, 110, 55); strk(pgy, CY, 4);
   anim(pbx, tin, tout, { a: "right" });
-  txt(str, 44, WH, x - w / 2 + 120, y + 15, tin + 0.1, tout, { just: LEFT, a: "right" });
+  txt(str, size, WH, pl + lead + tw / 2, y + 15, tin + 0.1, tout, { just: CENTER, a: "right" });   // texto CENTRADO no espaço livre
+  if (icon) return place(icon, pl, y, tin - 0.1, tout, { s: iS || 62 });
 }
 // C: desiste no 1º silêncio
-pillText("desiste no 1º silêncio", 560, 200, 760, 21.9, 23.7);
-place(icFlag(), 210, 200, 21.8, 23.7, { s: 62 });
+selo("desiste no 1º silêncio", 200, 21.9, 23.7, icFlag());
 // F: humor do vendedor
-pillText("humor do vendedor", 520, 200, 680, 34.5, 36.3);
-place(icFace(34.8, 35.2, 35.6), 210, 200, 34.3, 36.3, { s: 62 });
+selo("humor do vendedor", 200, 34.5, 36.3, icFace(34.8, 35.2, 35.6));
 // J: CTA
 var lgb = S(c, 200, 150, "Logo fundo"); var lgg = G(lgb); aRect(lgg, 300, 110, 55); fill(lgg, BG, 80);
 anim(lgb, 51.6, DUR + 0.3, { a: "down" });
@@ -532,7 +542,7 @@ ripple.moveToBeginning();
 var hand = S(c, 905, 1745, "Dedo"); var hg = G(hand); aEll(hg, 70, 70); fill(hg, WH, 90);
 hand.inPoint = 52.8; hand.outPoint = DUR + 0.3;
 T(hand).property("Scale").expression = "var k=((time-52.9)*1.3)%1; k<0.15? [80,80] : [100,100]";
-pillText("agende uma conversa", 540, 1460, 640, 53.3, DUR + 0.3);
+selo("agende uma conversa", 1460, 53.3, DUR + 0.3, null);
 
 c.workAreaStart = 0; c.workAreaDuration = DUR;
 writeLn("layers: " + c.numLayers + " comps: " + p.numItems);
