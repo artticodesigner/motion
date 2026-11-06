@@ -22,6 +22,19 @@ Faça tudo do começo ao fim sem perguntar etapa por etapa. Só pergunte se prec
    - **Selos e pílulas sempre centralizados na tela:** use a função `selo()` do `exemplo-build.jsx` (não posicione com x/largura fixos). Ela mede o texto, calcula a largura da pílula e centraliza o conjunto ícone + pílula em W/2, com o texto centrado dentro da pílula. Nunca posicione ícone, pílula e texto separados com coordenadas escritas à mão. Vale também para a pílula do CTA ("agende uma conversa", "a resposta te deu medo?").
 7. **Revisão visual antes do render final:** confira que todo selo/pílula está centrado na horizontal (margens iguais dos dois lados) e sem sobra de espaço dentro da pílula; gere frames de todas as cenas, olhe e corrija sobreposições, textos estourando e conflitos com textos/legendas já queimados no vídeo original (eles costumam ficar no meio/topo; posicione selos e CTA longe deles).
 
+## Vídeos longos (3 min ou mais): motion pontual
+
+O estilo acima é pensado pra vídeos curtos (até ~1 min30). Em vídeos de **3 minutos pra cima**, motion o tempo todo cansa e apaga a pessoa falando. Inverta a proporção:
+
+1. **Tela cheia é o estado padrão.** O vídeo original fica em tela cheia na maior parte do tempo; o motion (PiP + cenas) entra só em momentos pontuais.
+2. **Meta:** motion em ~25–35% da duração, no máximo. Cada janela de motion dura ~8–20 s, com pelo menos 20–30 s de tela cheia entre uma e outra.
+3. **O que merece motion:** conceito que precisa ser visualizado (processo, passo a passo, comparação, número, lista), dado ou estatística, história com personagens/marcas. Explicação simples, opinião e conversa ficam em tela cheia.
+4. **Selos animados** (ícone + frase curta) continuam valendo nos momentos de impacto em tela cheia, mas poucos e espaçados.
+5. **Estrutura:** 0–5 s tela cheia (igual ao estilo normal) → tela cheia por padrão → janelas de motion pontuais → CTA final em tela cheia (~4 s, igual ao estilo normal).
+6. **No `build.jsx`:** o array `cuts` fica com poucas janelas `PIP` curtas (cada uma abre com `PIP` e fecha com `FULL`); o resto é `FULL`. Logo do topo, etiqueta e barra de progresso aparecem só dentro das janelas de motion. Use o mesmo `selo()` e os mesmos helpers.
+7. **Roteiro:** em vez de dividir a fala inteira em blocos, escolha primeiro as janelas (liste início, fim e o que vai ilustrar) e só então desenhe as cenas. Em caso de dúvida se um trecho merece motion, deixe em tela cheia.
+8. **Revisão:** gere frames só das janelas de motion e dos selos/CTA, mas confira também as transições PiP ↔ tela cheia.
+
 ## Identidade visual (Arttico, padrão)
 
 Se o projeto tiver `marca/design-guide.md` preenchido, ele tem prioridade. Senão:
