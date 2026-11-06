@@ -11,7 +11,7 @@ Identidade visual padrão: Arttico (navy `#010030` + ciano `#38d7ff`, fonte Inte
 ## Instalação
 
 Funciona no Windows. Não precisa instalar nada antes:
-- **EffectCraft:** se não estiver no PC, a skill baixa e instala sozinha a versão portátil oficial ([storytold/effectcraft](https://github.com/storytold/effectcraft)), conferindo o checksum e sem pedir admin (`scripts/instalar-effectcraft.ps1`).
+- **EffectCraft:** se não estiver no PC, a skill baixa e instala sozinha a versão portátil oficial **0.21.1** ([storytold/effectcraft](https://github.com/storytold/effectcraft)), conferindo o checksum e sem pedir admin (`scripts/instalar-effectcraft.ps1`). A versão é fixa e o checksum (SHA-256) dela está gravado no script: se o arquivo baixado for diferente, a instalação é cancelada. A skill nunca procura "a versão mais recente" e nunca atualiza sozinha; só uma instalação existente exatamente na 0.21.1 é aproveitada, e qualquer outra versão é ignorada (sem ser apagada).
 - **Python, FFmpeg e faster-whisper:** o Claude instala na primeira vez, pedindo permissão.
 
 No PowerShell:

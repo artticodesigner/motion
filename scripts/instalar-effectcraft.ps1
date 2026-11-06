@@ -1,9 +1,15 @@
 ﻿<#
   Garante que o EffectCraft (CLI) está disponível e imprime o caminho do effectcraft-cli.exe na última linha.
-  - Se já estiver instalado (ArtCraft, instalação MSI ou portátil anterior), só mostra o caminho.
-  - Senão baixa a versão portátil mais recente do GitHub oficial (storytold/effectcraft),
-    confere o SHA-256 publicado no release e extrai em %LOCALAPPDATA%\Programs\EffectCraft (sem precisar de admin).
+
+  VERSÃO FIXA: só existe UMA versão aceita (variável $Version abaixo) e o SHA-256 dela está gravado neste arquivo.
+  - Se já existir um effectcraft-cli.exe EXATAMENTE nessa versão (em qualquer pasta conhecida), só mostra o caminho.
+  - Qualquer outra versão encontrada é ignorada (não é usada nem apagada).
+  - Se não existir, baixa direto do GitHub oficial (storytold/effectcraft) a versão fixa, confere o SHA-256 gravado aqui
+    (se não bater, a instalação é cancelada) e extrai em %LOCALAPPDATA%\Programs\EffectCraft (sem precisar de admin).
+  - NUNCA procura "a versão mais recente" e nunca atualiza sozinho. Para trocar de versão é preciso editar $Version e $Sha256
+    neste arquivo de propósito (pegue os SHA-256 na página do release).
   Uso: powershell -ExecutionPolicy Bypass -File instalar-effectcraft.ps1 [-InstallDir <pasta>] [-Force]
+       (-Force reinstala a versão fixa mesmo que já exista)
 #>
 param(
   [string]$InstallDir = (Join-Path $env:LOCALAPPDATA "Programs\EffectCraft"),
@@ -11,6 +17,18 @@ param(
 )
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# ───────── versão fixa e checksums (EffectCraft v0.21.1) ─────────
+$Version = "0.21.1"
+$Sha256 = @{
+  "x64"   = "598e8c78483f00926f1b9f88c055f53e4c771f824f06a52ad02ab18be5c66213"
+  "arm64" = "fd96b43b3821647db66213c8059345ea6f02d2d8479c7449f24c45813e53083a"
+  "x86"   = "88cf701d6239ba2475c46770fb90effba54806971ffdd01c58ab56f95d204a3c"
+}
+
+function Get-CliVersion($exe) {
+  try { $o = (& $exe --version 2>$null | Select-Object -First 1); return ("$o" -replace '^\s*effectcraft-cli\s+', '').Trim() } catch { return $null }
+}
 
 function Find-Cli {
   $roots = @(
@@ -22,48 +40,37 @@ function Find-Cli {
   )
   foreach ($r in $roots) {
     if ($r -and (Test-Path $r)) {
-      $hit = Get-ChildItem $r -Recurse -Filter "effectcraft-cli.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-      if ($hit) { return $hit.FullName }
+      foreach ($hit in (Get-ChildItem $r -Recurse -Filter "effectcraft-cli.exe" -ErrorAction SilentlyContinue)) {
+        if ((Get-CliVersion $hit.FullName) -eq $Version) { return $hit.FullName }
+      }
     }
   }
-  $cmd = Get-Command effectcraft-cli -ErrorAction SilentlyContinue
-  if ($cmd) { return $cmd.Source }
   return $null
 }
 
 if (-not $Force) {
   $found = Find-Cli
-  if ($found) { Write-Host "EffectCraft já instalado."; Write-Output $found; exit 0 }
+  if ($found) { Write-Host "EffectCraft $Version já instalado."; Write-Output $found; exit 0 }
 }
 
 $arch = switch ($env:PROCESSOR_ARCHITECTURE) { "ARM64" { "arm64" } "x86" { "x86" } default { "x64" } }
-Write-Host "Buscando a versão mais recente do EffectCraft (windows-$arch)..."
-$rel = Invoke-RestMethod -Uri "https://api.github.com/repos/storytold/effectcraft/releases/latest" -Headers @{ "User-Agent" = "motion-skill" }
-$asset = $rel.assets | Where-Object { $_.name -match "^effectcraft-[\d\.]+-windows-$arch-portable\.zip$" } | Select-Object -First 1
-if (-not $asset) { throw "Release $($rel.tag_name) não tem o pacote portátil windows-$arch." }
+$expected = $Sha256[$arch]
+if (-not $expected) { throw "Arquitetura $arch sem checksum cadastrado; instalação cancelada." }
+$name = "effectcraft-$Version-windows-$arch-portable.zip"
+$url = "https://github.com/storytold/effectcraft/releases/download/v$Version/$name"
 
 $tmp = Join-Path $env:TEMP ("effectcraft-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Force $tmp | Out-Null
-$zip = Join-Path $tmp $asset.name
-Write-Host "Baixando $($asset.name) ($([math]::Round($asset.size / 1MB)) MB)..."
+$zip = Join-Path $tmp $name
+Write-Host "Baixando EffectCraft v$Version ($name)..."
 $ProgressPreference = "SilentlyContinue"
-Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip -UseBasicParsing -Headers @{ "User-Agent" = "motion-skill" }
+Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing -Headers @{ "User-Agent" = "motion-skill" }
 
-# conferir o SHA-256 (digest do asset; se não houver, usa o SHA256SUMS.txt do release)
-$expected = $null
-if ($asset.digest -and $asset.digest -like "sha256:*") { $expected = $asset.digest.Substring(7) }
-else {
-  $sums = $rel.assets | Where-Object { $_.name -eq "SHA256SUMS.txt" } | Select-Object -First 1
-  if ($sums) {
-    $txt = (Invoke-WebRequest -Uri $sums.browser_download_url -UseBasicParsing -Headers @{ "User-Agent" = "motion-skill" }).Content
-    if ($txt -is [byte[]]) { $txt = [Text.Encoding]::UTF8.GetString($txt) }
-    $line = ($txt -split "`n") | Where-Object { $_ -match [regex]::Escape($asset.name) } | Select-Object -First 1
-    if ($line) { $expected = ($line -split "\s+")[0] }
-  }
-}
-if (-not $expected) { throw "Não achei o SHA-256 publicado para $($asset.name); instalação cancelada." }
 $actual = (Get-FileHash $zip -Algorithm SHA256).Hash
-if ($actual.ToLower() -ne $expected.ToLower()) { throw "SHA-256 não confere (esperado $expected, veio $actual). Instalação cancelada." }
+if ($actual.ToLower() -ne $expected.ToLower()) {
+  Remove-Item $tmp -Recurse -Force
+  throw "SHA-256 NÃO confere (esperado $expected, veio $actual). Nada foi instalado."
+}
 Write-Host "Checksum OK."
 
 if (Test-Path $InstallDir) { Remove-Item $InstallDir -Recurse -Force }
@@ -73,5 +80,7 @@ Remove-Item $tmp -Recurse -Force
 
 $cli = Get-ChildItem $InstallDir -Recurse -Filter "effectcraft-cli.exe" | Select-Object -First 1
 if (-not $cli) { throw "O pacote foi extraído, mas não tem effectcraft-cli.exe em $InstallDir." }
-Write-Host "EffectCraft $($rel.tag_name) instalado em $InstallDir"
+$got = Get-CliVersion $cli.FullName
+if ($got -ne $Version) { throw "Versão instalada ($got) diferente da esperada ($Version)." }
+Write-Host "EffectCraft v$Version instalado em $InstallDir"
 Write-Output $cli.FullName
