@@ -33,7 +33,7 @@ Se o projeto tiver `marca/design-guide.md` preenchido, ele tem prioridade. Senã
 ## Fluxo
 
 1. **Localizar ferramentas**
-   - EffectCraft CLI: `C:\Program Files\ArtCraft\EffectCraft\effectcraft-cli.exe` (senão procure `effectcraft-cli.exe` em `%LOCALAPPDATA%\Programs`)
+   - **EffectCraft:** rode `powershell -NoProfile -ExecutionPolicy Bypass -File "<pasta da skill>/scripts/instalar-effectcraft.ps1"`. Use a **última linha** da saída como caminho do `effectcraft-cli.exe`. Se o EffectCraft já estiver instalado (ArtCraft, MSI ou portátil), o script só devolve o caminho. Se não estiver, ele instala sozinho, **sem perguntar ao usuário**: baixa a versão portátil mais recente do GitHub oficial (`storytold/effectcraft`), confere o SHA-256 e extrai em `%LOCALAPPDATA%\Programs\EffectCraft`, sem precisar de admin. Para atualizar uma instalação portátil, use `-Force`.
    - Python 3.12 (`%LOCALAPPDATA%\Programs\Python\Python312\python.exe`), ffmpeg, `faster-whisper`. Se faltar, peça permissão e instale: `winget install Python.Python.3.12`, `winget install Gyan.FFmpeg`, `python -m pip install faster-whisper numpy`. O PATH não atualiza no shell atual: use caminhos completos (ffmpeg fica em `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\*\bin\`).
    - Não use o Whisper do FilmCraft: o download de modelos é bloqueado nessa build.
 2. **Probe do vídeo:** `ffprobe` (resolução, fps, duração). Extraia 1 frame (`ffmpeg -ss 2 -frames:v 1`) e olhe onde estão a pessoa e as legendas queimadas.

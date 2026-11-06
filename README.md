@@ -10,7 +10,9 @@ Identidade visual padrão: Arttico (navy `#010030` + ciano `#38d7ff`, fonte Inte
 
 ## Instalação
 
-Pré-requisito: **EffectCraft** instalado (Windows). Python, FFmpeg e faster-whisper o próprio Claude instala na primeira vez, pedindo permissão.
+Funciona no Windows. Não precisa instalar nada antes:
+- **EffectCraft:** se não estiver no PC, a skill baixa e instala sozinha a versão portátil oficial ([storytold/effectcraft](https://github.com/storytold/effectcraft)), conferindo o checksum e sem pedir admin (`scripts/instalar-effectcraft.ps1`).
+- **Python, FFmpeg e faster-whisper:** o Claude instala na primeira vez, pedindo permissão.
 
 No PowerShell:
 
@@ -41,6 +43,7 @@ O resultado sai numa pasta `saida` ao lado do vídeo: o MP4 final, o projeto `.e
 | Caminho | O que é |
 |---|---|
 | `SKILL.md` | instruções da skill: estilo, fluxo, notas técnicas do EffectCraft |
+| `scripts/instalar-effectcraft.ps1` | acha o EffectCraft ou instala a versão portátil oficial (com checagem SHA-256) |
 | `scripts/transcribe.py` | transcrição PT-BR com faster-whisper (tempo por palavra) |
 | `references/exemplo-build.jsx` | script completo de um vídeo aprovado, usado como base |
 | `assets/` | logos prontos: Arttico, Instagram, TikTok |
