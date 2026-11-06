@@ -12,14 +12,14 @@ Faça tudo do começo ao fim sem perguntar etapa por etapa. Só pergunte se prec
 1. **0–5 s:** vídeo original em tela cheia, sem nada por cima.
 2. **Depois:** o vídeo encolhe (animação suave de ~0,6 s) para um **PiP arredondado com borda ciano no canto superior direito**. O motion ocupa o resto da tela. O áudio original toca do início ao fim.
 3. **Volte pra tela cheia** em 2–4 momentos de impacto (frase forte, pergunta, CTA), com um **selo animado** por cima: ícone num círculo + frase curta numa pílula escura, no topo da tela. Depois volte ao PiP.
-4. **Final (~4 s):** tela cheia + CTA: logo da marca no topo numa pílula escura, botão "Link na bio" pulsando, animação de toque (ripple).
+4. **Final (~4 s):** tela cheia + CTA limpo: **somente um botão** "Link na bio" pulsando, com animação de toque (ripple). **Sem logo no topo e sem pílula/texto extra** (nada de "agende uma conversa" etc.): o final tem que ficar limpo, com um único CTA. Posicione o botão longe da legenda queimada no vídeo.
 5. **Nunca cena só de texto e caixas.** Cada trecho da fala ganha visual próprio:
    - ícones vetoriais desenhados (sino tocando, relógio com ponteiros girando, engrenagem girando, calendário, pessoa, raio, documento, chat, avião de papel, megafone, check, X vermelho, coração, bandeira, carinha que muda de humor…)
    - **logos reais** de toda marca/rede citada (Instagram, TikTok, WhatsApp, Google, iFood…). Use os de `assets/` ou baixe do Wikimedia Commons/fonte oficial. Nada de logo desenhado à mão.
    - mini-cenas que ilustram a fala: celular com mensagem enviada → "visualizado" → "digitando…" → silêncio; notificações empilhando e empurrando outra; cards deslizando; régua/linha do tempo com nós e pulso de luz; documentos caindo numa pilha; traços que se desenham (trim paths); X riscando; check sendo desenhado
    - texto só como apoio: uma manchete curta por cena (≤ 5 palavras) + rótulos curtos
 6. **Sincronia:** cada elemento entra no segundo exato da palavra correspondente (use `words.txt`).
-   - **Selos e pílulas sempre centralizados na tela:** use a função `selo()` do `exemplo-build.jsx` (não posicione com x/largura fixos). Ela mede o texto, calcula a largura da pílula e centraliza o conjunto ícone + pílula em W/2, com o texto centrado dentro da pílula. Nunca posicione ícone, pílula e texto separados com coordenadas escritas à mão. Vale também para a pílula do CTA ("agende uma conversa", "a resposta te deu medo?").
+   - **Selos e pílulas sempre centralizados na tela:** use a função `selo()` do `exemplo-build.jsx` (não posicione com x/largura fixos). Ela mede o texto, calcula a largura da pílula e centraliza o conjunto ícone + pílula em W/2, com o texto centrado dentro da pílula. Nunca posicione ícone, pílula e texto separados com coordenadas escritas à mão. Vale para todo selo de impacto em tela cheia (ex.: "a resposta te deu medo?"). O CTA final não leva pílula: só o botão.
 7. **Revisão visual antes do render final:** confira que todo selo/pílula está centrado na horizontal (margens iguais dos dois lados) e sem sobra de espaço dentro da pílula; gere frames de todas as cenas, olhe e corrija sobreposições, textos estourando e conflitos com textos/legendas já queimados no vídeo original (eles costumam ficar no meio/topo; posicione selos e CTA longe deles).
 
 ## Vídeos longos (3 min ou mais): motion pontual

@@ -525,11 +525,7 @@ function selo(str, y, tin, tout, icon, iS, size) {
 selo("desiste no 1º silêncio", 200, 21.9, 23.7, icFlag());
 // F: humor do vendedor
 selo("humor do vendedor", 200, 34.5, 36.3, icFace(34.8, 35.2, 35.6));
-// J: CTA
-var lgb = S(c, 200, 150, "Logo fundo"); var lgg = G(lgb); aRect(lgg, 300, 110, 55); fill(lgg, BG, 80);
-anim(lgb, 51.6, DUR + 0.3, { a: "down" });
-var lg3 = c.layers.add(logo); lg3.name = "Logo CTA"; T(lg3).property("Position").setValue([200, 150]); T(lg3).property("Scale").setValue([58, 58]);
-anim(lg3, 51.7, DUR + 0.3, { a: "down" });
+// J: CTA — limpo: SÓ o botão "Link na bio" (sem logo no topo, sem pílula extra tipo "agende uma conversa")
 var ripple = S(c, 905, 1745, "Toque"); var rpg = G(ripple); aEll(rpg, 120, 120); strk(rpg, WH, 8);
 ripple.inPoint = 52.9; ripple.outPoint = DUR + 0.3;
 T(ripple).property("Scale").expression = "var k=((time-52.9)*1.3)%1; [60+k*140, 60+k*140]";
@@ -542,7 +538,6 @@ ripple.moveToBeginning();
 var hand = S(c, 905, 1745, "Dedo"); var hg = G(hand); aEll(hg, 70, 70); fill(hg, WH, 90);
 hand.inPoint = 52.8; hand.outPoint = DUR + 0.3;
 T(hand).property("Scale").expression = "var k=((time-52.9)*1.3)%1; k<0.15? [80,80] : [100,100]";
-selo("agende uma conversa", 1460, 53.3, DUR + 0.3, null);
 
 c.workAreaStart = 0; c.workAreaDuration = DUR;
 writeLn("layers: " + c.numLayers + " comps: " + p.numItems);
