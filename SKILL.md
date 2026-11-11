@@ -11,7 +11,7 @@ Faça tudo do começo ao fim sem perguntar etapa por etapa. Só pergunte se prec
 
 1. **0–5 s:** vídeo original em tela cheia, sem nada por cima.
 2. **Depois:** o vídeo encolhe (animação suave de ~0,6 s) para um **PiP arredondado com borda ciano no canto superior direito**. O motion ocupa o resto da tela. O áudio original toca do início ao fim.
-3. **Volte pra tela cheia** em 2–4 momentos de impacto (frase forte, pergunta, CTA), com um **selo animado** por cima: ícone num círculo + frase curta numa pílula escura, no topo da tela. Depois volte ao PiP.
+3. **Volte pra tela cheia** em 2–4 momentos de impacto (frase forte, pergunta, CTA), com um **selo animado** por cima: ícone num círculo + frase curta numa pílula escura, no alto da área segura (y ~340, nunca nos 250 px do topo). Depois volte ao PiP.
 4. **Final (~4 s):** tela cheia + CTA limpo: **somente um botão** "Link na bio" pulsando, com animação de toque (ripple). **Sem logo no topo e sem pílula/texto extra** (nada de "agende uma conversa" etc.): o final tem que ficar limpo, com um único CTA. Posicione o botão longe da legenda queimada no vídeo.
 5. **Nunca cena só de texto e caixas.** Cada trecho da fala ganha visual próprio:
    - ícones vetoriais desenhados (sino tocando, relógio com ponteiros girando, engrenagem girando, calendário, pessoa, raio, documento, chat, avião de papel, megafone, check, X vermelho, coração, bandeira, carinha que muda de humor…)
@@ -35,13 +35,32 @@ O estilo acima é pensado pra vídeos curtos (até ~1 min30). Em vídeos de **3 
 7. **Roteiro:** em vez de dividir a fala inteira em blocos, escolha primeiro as janelas (liste início, fim e o que vai ilustrar) e só então desenhe as cenas. Em caso de dúvida se um trecho merece motion, deixe em tela cheia.
 8. **Revisão:** gere frames só das janelas de motion e dos selos/CTA, mas confira também as transições PiP ↔ tela cheia.
 
+## Área segura do Reels (obrigatório)
+
+O vídeo vai pro Instagram Reels, e a interface do app fica por cima dele. **Nenhum texto, ícone com informação, selo, botão ou barra pode ficar nas áreas que a interface cobre.** Só fundo e decoração (brilho, grade) podem passar por elas. Em 1080×1920:
+
+| Zona proibida | Onde | O que o Instagram põe ali |
+|---|---|---|
+| Topo | y 0–250 | "Reels" e ícone da câmera |
+| Base | y 1580–1920 | @usuário, Seguir, legenda, áudio |
+| Coluna direita | x 940–1080, y 1100–1580 | curtir, comentar, enviar, "..." |
+| Margens | x < 60 e x > 1020 | borda da tela |
+
+- **Área segura** = caixa de cima (x 60–1020, y 250–1100) + caixa de baixo (x 60–940, y 1100–1580). No `exemplo-build.jsx` isso está em `SAFE`, com os centros `CX` (540, caixa de cima) e `CXL` (500, caixa de baixo) e a linha de manchete `HY`. Use essas constantes, não coordenadas soltas.
+- **Layout padrão:** PiP (280 px) no canto superior direito **dentro** da área segura (topo em y 270), logo + etiqueta à esquerda dele, barra de progresso no topo da área segura à esquerda do PiP (**nunca no rodapé**), manchete em `HY` (850), conteúdo da cena entre y ~950 e 1560 centrado em `CXL`.
+- **Selos** da tela cheia em y ~340; **botão do CTA** em y ~1440 centrado em `CXL`.
+- Elementos que entram animados também não podem nascer nem passar pela coluna da direita ou pela base: faça-os surgir já na posição final (pop/fade) ou vir de dentro da área segura.
+- **Conferência:** o build imprime `checagem área segura: ok` ou um `AVISO área segura` por texto fora da área (mede o retângulo real do texto ao longo do tempo). Corrija todo aviso. Ícones e precomps não entram na checagem automática, então confira-os nos frames.
+- Gere os frames de teste da comp **"Revisão Reels"** (o vídeo com as zonas proibidas pintadas de vermelho) e confira que nada com informação encosta no vermelho. O render final é sempre da comp principal.
+- Legendas queimadas no vídeo original não dá pra mover: só garanta que selo e CTA não as cubram.
+
 ## Identidade visual (Arttico, padrão)
 
 Se o projeto tiver `marca/design-guide.md` preenchido, ele tem prioridade. Senão:
 - Fundo `#010030`, cards `#001145` / `#122461`, ciano `#38d7ff`, ciano claro `#a3e3f0`, branco; vermelho `#FF5566` só para "errado/riscado"
 - Fonte **Inter** (Bold/SemiBold/Medium), já embutida no EffectCraft
 - Fundo: solid navy + brilho ciano desfocado se movendo devagar + grade sutil (opacidade 4–6%)
-- Durante o motion: logo branco no topo esquerdo + tag pequena em caps com tracking, barra de progresso fina no rodapé
+- Durante o motion: logo branco + tag pequena em caps com tracking à esquerda do PiP, barra de progresso fina no topo da área segura (ver "Área segura do Reels")
 - Logo: `assets/logo-arttico.png` (branco, fundo transparente)
 
 ## Fluxo
@@ -55,7 +74,7 @@ Se o projeto tiver `marca/design-guide.md` preenchido, ele tem prioridade. Senã
 4. **Roteiro de cenas:** divida a fala em blocos de 3–8 s. Para cada bloco, defina: manchete, visual principal (ícones/logos/mini-cena), palavras-gatilho com tempo, e se é PiP ou tela cheia.
 5. **Escrever o build.jsx** (na pasta de trabalho, não dentro da skill) partindo de `references/exemplo-build.jsx`. No topo, ajuste `SKILL_DIR` para o caminho real desta skill (com barras `/`) e `VID` para o vídeo. O exemplo é o (vídeo aprovado, com helpers prontos: `place`, `anim`, `moveTo`, `txt`, ícones `ic*`, `phone`, `notifCard`, `leadCard`, `nodeIcon`, estados FULL/PIP via `cuts`). Troque caminhos, textos, tempos e cenas. Reaproveite e crie ícones novos conforme o conteúdo.
 6. **Build:** `effectcraft-cli script build.jsx --empty --save-as projeto.ecproj`
-7. **Frames de teste:** `effectcraft-cli render-frame --project projeto.ecproj --comp "<nome>" --time S --max-side 640 --out f.png` para ~15 momentos. Junte numa folha com `ffmpeg ... -filter_complex hstack=inputs=5` e olhe. Corrija e repita.
+7. **Frames de teste:** confira que o build imprimiu `checagem área segura: ok`. Depois `effectcraft-cli render-frame --project projeto.ecproj --comp "Revisão Reels" --time S --max-side 640 --out f.png` para ~15 momentos. Junte numa folha com `ffmpeg ... -filter_complex hstack=inputs=5` e olhe. Corrija e repita.
 8. **Render:** `effectcraft-cli render --project projeto.ecproj --comp "<nome>" --out "<pasta do vídeo>/saida/<nome>-motion.mp4" --format h264 --bitrate 14000 --audio on --progress` (~3 min para 55 s). Confira com ffprobe que tem vídeo + áudio e a duração certa.
 9. **Entregar:** salve em `saida/` o MP4, o `.ecproj`, o `build.jsx` e os logos usados. Resuma as cenas e aponte o que o usuário deve conferir (palavras incertas da transcrição, nomes).
 

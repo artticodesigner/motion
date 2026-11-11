@@ -4,6 +4,13 @@ var SKILL_DIR = "C:/Users/SEU_USUARIO/.claude/skills/motion/"; // ajuste: pasta 
 var VID = "C:/caminho/do/video.mp4"; // ajuste: vídeo original
 var LOGO = SKILL_DIR + "assets/logo-arttico.png";
 var W = 1080, H = 1920, FPS = 24, DUR = 55.2;
+// ÁREA SEGURA DO REELS (interface do Instagram fica por cima do vídeo). Nada de texto/informação fora dela:
+//  - topo 0–250 ("Reels" + câmera) · base 1580–1920 (@usuário, legenda, áudio, Seguir)
+//  - coluna direita x > 940 entre y 1100 e 1580 (curtir, comentar, enviar, "...") · margens laterais de 60
+// Zona segura = caixa de cima (x 60–1020, y 250–1100) + caixa de baixo (x 60–940, y 1100–1580).
+var SAFE = { t: 250, b: 1580, l: 60, r: 1020, rLow: 940, yLow: 1100 };
+var CX = W / 2, CXL = (SAFE.l + SAFE.rLow) / 2;   // centro da caixa de cima (540) e da de baixo (500)
+var HY = 850;                                      // linha da manchete de cada cena (logo abaixo do PiP)
 
 var BG = [0.004, 0, 0.19], NAVY = [0, 0.067, 0.27], NAVY2 = [0.07, 0.14, 0.38], CY = [0.22, 0.84, 1], CY2 = [0.64, 0.89, 0.94],
     WH = [1, 1, 1], GR = [0.6, 0.65, 0.75], RED = [1, 0.33, 0.4], BLK = [0.02, 0.02, 0.04],
@@ -315,8 +322,8 @@ function phone() {
 
 // ───────── 1) vídeo + estados tela cheia / PiP ─────────
 var v = c.layers.add(vid); v.name = "Vídeo original";
-var PW = 300, PH = Math.round(PW * 16 / 9), PM = 44;
-var PX = W - PM - PW / 2, PY = PM + 110 + PH / 2;
+var PW = 280, PH = Math.round(PW * 16 / 9);
+var PX = SAFE.r - PW / 2, PY = SAFE.t + 20 + PH / 2;   // PiP dentro da área segura, canto superior direito
 var pscale = PW / 2160 * 100;
 var FULL = { s: 50, p: [W / 2, H / 2], ms: 100, r: 0, b: 0 }, PIP = { s: pscale, p: [PX, PY], ms: PW / W * 100, r: 150, b: 100 };
 var cuts = [[5.0, PIP], [19.3, FULL], [23.7, PIP], [33.1, FULL], [36.3, PIP], [50.9, FULL]];
@@ -358,105 +365,106 @@ for (var gx = 0; gx < 7; gx++) { var gq2 = G(grid); aRect(gq2, 2, 1300, 0, -540 
 grid.moveToEnd(); glow.moveToEnd(); bgl.moveToEnd();
 
 // topo: logo + etiqueta + progresso (ficam por trás do vídeo; somem na tela cheia)
-var lg1 = c.layers.add(logo); lg1.name = "Logo topo"; T(lg1).property("Scale").setValue([55, 55]); T(lg1).property("Position").setValue([PM + 110, PM + 60]);
+var lg1 = c.layers.add(logo); lg1.name = "Logo topo"; T(lg1).property("Scale").setValue([55, 55]); T(lg1).property("Position").setValue([SAFE.l + 110, 340]);
 anim(lg1, 5.5, DUR, { a: "right" });
-txt("FOLLOW-UP QUE VENDE", 26, CY, PM + 8, PM + 128, 5.7, DUR, { just: LEFT, tracking: 120, a: "right" });
-var prog = S(c, 60, 1850, "Progresso"); var prg = G(prog); var prr = aRect(prg, W - 120, 8, 4); prr.property("Position").setValue([(W - 120) / 2, 0]); fill(prg, CY);
+txt("FOLLOW-UP QUE VENDE", 26, CY, SAFE.l + 8, 420, 5.7, DUR, { just: LEFT, tracking: 120, a: "right" });
+var PGW = PX - PW / 2 - 40 - SAFE.l;   // barra de progresso no topo da área segura, à esquerda do PiP (nunca no rodapé: lá fica a legenda do Reels)
+var prog = S(c, SAFE.l, SAFE.t + 14, "Progresso"); var prg = G(prog); var prr = aRect(prg, PGW, 8, 4); prr.property("Position").setValue([PGW / 2, 0]); fill(prg, CY);
 key(T(prog).property("Scale"), [[5.4, [0, 100]], [DUR, [100, 100]]]);
 try { T(prog).property("Scale").setTemporalEaseAtKey(1, [new KeyframeEase(0, 0.1)], [new KeyframeEase(0, 0.1)]); T(prog).property("Scale").setTemporalEaseAtKey(2, [new KeyframeEase(0, 0.1)], [new KeyframeEase(0, 0.1)]); } catch (e) {}
 
 // ───────── CENA A 5.5–11.4: celular, orçamento visualizado, silêncio ─────────
-txt("Visualizou… e sumiu?", 80, WH, 540, 800, 5.7, 11.4);
-place(phone(), 540, 1330, 5.6, 11.4, { a: "up", d: 0.6 });
-place(icClock(), 150, 1150, 8.2, 11.4, { s: 60 });
-txt("ocupado", 36, CY2, 150, 1260, 8.4, 11.4, { style: "SemiBold" });
-place(icPlay(), 930, 1450, 10.0, 11.4, { s: 55 });
-txt("distraído", 36, CY2, 930, 1555, 10.2, 11.4, { style: "SemiBold" });
+txt("Visualizou… e sumiu?", 80, WH, CX, HY, 5.7, 11.4);
+place(phone(), CXL, 1250, 5.6, 11.4, { a: "up", d: 0.6, s: 70 });
+place(icClock(), 150, 1080, 8.2, 11.4, { s: 55 });
+txt("ocupado", 34, CY2, 150, 1185, 8.4, 11.4, { style: "SemiBold" });
+place(icPlay(), 845, 1180, 10.0, 11.4, { s: 50 });
+txt("distraído", 34, CY2, 845, 1275, 10.2, 11.4, { style: "SemiBold" });
 
 // ───────── CENA B 11.4–19.9: Instagram, TikTok, notificação esquecida ─────────
-txt("Foi rolar o feed", 84, WH, 540, 800, 11.5, 17.2);
-var ig = place(icInstagram(), 540, 1150, 11.9, 17.2, { s: 110, d: 0.6 });
+txt("Foi rolar o feed", 84, WH, CX, HY, 11.5, 17.2);
+var ig = place(icInstagram(), CXL, 1140, 11.9, 17.2, { s: 105, d: 0.6 });
 moveTo(ig, 14.4, 14.9, [300, 1080], 75);
 for (var h = 0; h < 4; h++) {
   var hl = place(icHeart(h % 2 ? IGP : RED), 600 + h * 30, 1100, 12.4 + h * 0.45, 13.9 + h * 0.45, { s: 30 });
   key(T(hl).property("Position"), [[12.4 + h * 0.45, [600 + h * 25, 1080]], [13.9 + h * 0.45, [640 + (h % 2 ? 160 : -60), 860]]]);
 }
 // stories (anéis desenhados)
-var st = S(c, 540, 1460, "Stories");
+var st = S(c, CXL, 1440, "Stories");
 for (var r = 0; r < 4; r++) {
-  var sg = G(st); aEll(sg, 150, 150, -270 + r * 180, 0); fill(sg, NAVY2);
-  var sg2 = G(st); aEll(sg2, 170, 170, -270 + r * 180, 0); strk(sg2, r === 0 ? IGO : IGP, 10); trim(sg2, 12.6 + r * 0.2, 13.2 + r * 0.2);
+  var sg = G(st); aEll(sg, 140, 140, -255 + r * 170, 0); fill(sg, NAVY2);
+  var sg2 = G(st); aEll(sg2, 158, 158, -255 + r * 170, 0); strk(sg2, r === 0 ? IGO : IGP, 10); trim(sg2, 12.6 + r * 0.2, 13.2 + r * 0.2);
 }
 anim(st, 12.5, 14.5, { a: "up" });
 var tk = place(icTikTok(), 780, 1080, 14.7, 17.2, { s: 75, d: 0.6 });
 for (var vc = 0; vc < 3; vc++) {
   var t0 = 15.7 + vc * 0.5;
-  var card = S(c, 540, 1500, "Vídeo card " + vc); var cg = G(card); aRect(cg, 220, 380, 34); fill(cg, vc === 1 ? TKR : NAVY2);
-  var cg2 = G(card); aRect(cg2, 220, 380, 34); strk(cg2, TKC, 5);
+  var card = S(c, CXL, 1390, "Vídeo card " + vc); var cg = G(card); aRect(cg, 180, 320, 30); fill(cg, vc === 1 ? TKR : NAVY2);
+  var cg2 = G(card); aRect(cg2, 180, 320, 30); strk(cg2, TKC, 5);
   var cg3 = G(card); aPath(cg3, [[-22, -34], [38, 0], [-22, 34]], null, null, true); fill(cg3, WH);
   card.inPoint = t0; card.outPoint = t0 + 1.3;
-  key(T(card).property("Position"), [[t0, [540, 1800]], [t0 + 0.45, [540, 1500]], [t0 + 0.85, [540, 1500]], [t0 + 1.3, [540, 1240]]]);
+  key(T(card).property("Position"), [[t0, [CXL, 1560]], [t0 + 0.45, [CXL, 1390]], [t0 + 0.85, [CXL, 1390]], [t0 + 1.3, [CXL, 1200]]]);
   key(T(card).property("Opacity"), [[t0, 0], [t0 + 0.3, 100], [t0 + 0.9, 100], [t0 + 1.3, 0]]);
 }
-txt("…e esqueceu de responder", 70, WH, 540, 800, 17.3, 19.9);
-var slots = [1000, 1175, 1350, 1525];
-var ours = place(notifCard(icDoc(), "Sua empresa", "Orçamento.pdf", false), 540, slots[0], 17.3, 19.9, { a: "down" });
+txt("…e esqueceu de responder", 70, WH, CX, HY, 17.3, 19.9);
+var slots = [990, 1135, 1280, 1425];   // cards a 90%: cabem em x 113–887 e terminam antes de y 1500
+var ours = place(notifCard(icDoc(), "Sua empresa", "Orçamento.pdf", false), CXL, slots[0], 17.3, 19.9, { a: "down", s: 90 });
 var news = [[icInstagram(), "Instagram", "curtiu sua foto"], [icTikTok(), "TikTok", "novo vídeo pra você"], [icInstagram(), "Instagram", "3 novas mensagens"]];
 for (var n = 0; n < 3; n++) {
   var tn = 17.75 + n * 0.4;
-  moveTo(ours, tn, tn + 0.3, [540, slots[n + 1]]);
-  var nl = place(notifCard(news[n][0], news[n][1], news[n][2], true), 540, slots[0], tn, 19.9, { a: "down", d: 0.35 });
-  for (var m2 = n + 1; m2 < 3; m2++) { var tm = 17.75 + m2 * 0.4; moveTo(nl, tm, tm + 0.3, [540, slots[m2 - n]]); }
+  moveTo(ours, tn, tn + 0.3, [CXL, slots[n + 1]]);
+  var nl = place(notifCard(news[n][0], news[n][1], news[n][2], true), CXL, slots[0], tn, 19.9, { a: "down", d: 0.35, s: 90 });
+  for (var m2 = n + 1; m2 < 3; m2++) { var tm = 17.75 + m2 * 0.4; moveTo(nl, tm, tm + 0.3, [CXL, slots[m2 - n]]); }
 }
 key(T(ours).property("Opacity"), [[18.95, 100], [19.3, 35]]);
-txt("esquecido", 40, RED, 540, 1660, 19.1, 19.9, { style: "SemiBold" });
+txt("esquecido", 40, RED, CXL, 1552, 19.1, 19.9, { style: "SemiBold" });
 
 // ───────── CENA C (tela cheia 19.9–23.7): bandeira branca = desistiu ─────────
 // (overlays criados no fim, acima do vídeo)
 
 // ───────── CENA D 23.9–26.8: uma mensagem e próximo ─────────
-txt("Uma mensagem só…", 80, WH, 540, 800, 24.0, 26.8);
+txt("Uma mensagem só…", 80, WH, CX, HY, 24.0, 26.8);
 var trail = S(c, 0, 0, "Rastro");
-var trg = G(trail); aPath(trg, [[120, 1250], [960, 1020]], [[0, 0], [-300, 0]], [[300, 120], [0, 0]]); var trs = strk(trg, CY2, 6);
+var trg = G(trail); aPath(trg, [[120, 1180], [960, 1000]], [[0, 0], [-300, 0]], [[300, 120], [0, 0]]); var trs = strk(trg, CY2, 6);
 try { trs.property("Dashes").addProperty("ADBE Vector Stroke Dash 1").setValue(22); } catch (e) {}
 trim(trg, 24.1, 24.9); anim(trail, 24.1, 25.4, { a: "fade" });
-var pl = place(icPlane(), 120, 1250, 24.1, 25.3, { s: 45, d: 0.2 });
-key(T(pl).property("Position"), [[24.1, [120, 1250]], [24.5, [520, 1210]], [24.9, [960, 1020]]]);
+var pl = place(icPlane(), 120, 1180, 24.1, 25.3, { s: 45, d: 0.2 });
+key(T(pl).property("Position"), [[24.1, [120, 1180]], [24.5, [520, 1140]], [24.9, [960, 1000]]]);
 key(T(pl).property("Rotation"), [[24.1, 10], [24.9, -15]]);
-var lx = [220, 540, 860, 1180];
+var lx = [180, 450, 720, 720];   // o 4º lead nasce direto na posição final (nunca entra pela coluna de ícones do Reels)
 var leads = [];
 for (var ld = 0; ld < 4; ld++) {
   var lt = 24.9 + ld * 0.12;
-  var L = place(leadCard(ld + 1, ld === 0 ? 25.3 : undefined), lx[ld], 1400, ld === 3 ? 25.8 : lt, 26.8, { a: "up", d: 0.4 });
+  var L = place(leadCard(ld + 1, ld === 0 ? 25.3 : undefined), lx[ld], 1380, ld === 3 ? 26.2 : lt, 26.8, { a: ld === 3 ? "pop" : "up", d: 0.4, s: 85 });
   leads.push(L);
 }
-for (var ld2 = 0; ld2 < 4; ld2++) moveTo(leads[ld2], 25.8, 26.3, [lx[ld2] - 320, 1400]);
+for (var ld2 = 0; ld2 < 3; ld2++) moveTo(leads[ld2], 25.8, 26.3, [lx[ld2] - 270, 1380]);
 key(T(leads[0]).property("Opacity"), [[25.9, 100], [26.25, 0]]);
-txt("próximo contato →", 50, CY, 540, 1700, 25.9, 26.8, { style: "SemiBold" });
+txt("próximo contato →", 46, CY, CXL, 1170, 25.9, 26.8, { style: "SemiBold" });
 
 // ───────── CENA E 26.8–33.6: não é ser chato → lembrar de uma decisão ─────────
-txt("Follow-up bem feito", 84, WH, 540, 800, 26.9, 33.6);
-place(icMegaphone(27.6), 540, 1200, 27.3, 29.6, { s: 95 });
-txt("não é ser chato", 66, CY2, 540, 1490, 28.2, 29.6);
-place(icX(28.7), 540, 1200, 28.6, 29.6, { a: "fade", s: 110 });
-var bell = place(icBell(29.9), 540, 1180, 29.8, 33.6, { s: 95 });
-txt("é lembrar a pessoa", 66, WH, 540, 1460, 30.1, 31.1);
-moveTo(bell, 31.0, 31.5, [300, 1170], 70);
-place(icCheck(31.3), 780, 1170, 31.2, 33.6, { s: 85, a: "fade" });
-txt("de uma decisão", 66, WH, 540, 1440, 31.3, 33.6);
-txt("que ela já queria tomar", 66, CY, 540, 1530, 31.9, 33.6);
+txt("Follow-up bem feito", 84, WH, CX, HY, 26.9, 33.6);
+place(icMegaphone(27.6), CXL, 1190, 27.3, 29.6, { s: 95 });
+txt("não é ser chato", 64, CY2, CXL, 1470, 28.2, 29.6);
+place(icX(28.7), CXL, 1190, 28.6, 29.6, { a: "fade", s: 110 });
+var bell = place(icBell(29.9), CXL, 1170, 29.8, 33.6, { s: 95 });
+txt("é lembrar a pessoa", 64, WH, CXL, 1450, 30.1, 31.1);
+moveTo(bell, 31.0, 31.5, [290, 1160], 70);
+place(icCheck(31.3), 720, 1160, 31.2, 33.6, { s: 85, a: "fade" });
+txt("de uma decisão", 62, WH, CXL, 1430, 31.3, 33.6);
+txt("que ela já queria tomar", 60, CY, CXL, 1515, 31.9, 33.6);
 
 // ───────── CENA G 36.6–40.6: processo, prazo, responsável ─────────
-txt("Precisa ter", 84, WH, 540, 800, 36.6, 40.6);
-place(icGear(), 200, 1130, 37.2, 40.6, { s: 70 });
-txt("Processo", 48, WH, 200, 1320, 37.4, 40.6);
-place(icCalendar(38.9), 540, 1130, 38.7, 40.6, { s: 70 });
-txt("Prazo", 48, WH, 540, 1320, 38.9, 40.6);
-place(icPerson(), 880, 1130, 39.1, 40.6, { s: 70 });
-txt("Responsável", 48, WH, 880, 1320, 39.3, 40.6);
-var ul = S(c, 100, 1420, "Sublinhado"); var ug = G(ul); aPath(ug, [[0, 0], [880, 0]]); strk(ug, CY, 10); trim(ug, 39.7, 40.2);
+txt("Precisa ter", 84, WH, CX, HY, 36.6, 40.6);
+place(icGear(), 175, 1080, 37.2, 40.6, { s: 66 });
+txt("Processo", 42, WH, 175, 1250, 37.4, 40.6);
+place(icCalendar(38.9), 490, 1080, 38.7, 40.6, { s: 66 });
+txt("Prazo", 42, WH, 490, 1250, 38.9, 40.6);
+place(icPerson(), 800, 1080, 39.1, 40.6, { s: 66 });
+txt("Responsável", 42, WH, 800, 1250, 39.3, 40.6);
+var ul = S(c, 90, 1320, "Sublinhado"); var ug = G(ul); aPath(ug, [[0, 0], [820, 0]]); strk(ug, CY, 10); trim(ug, 39.7, 40.2);
 anim(ul, 39.7, 40.6, { a: "fade" });
-txt("definidos", 60, CY, 540, 1530, 39.9, 40.6);
+txt("definidos", 60, CY, CXL, 1430, 39.9, 40.6);
 
 // ───────── CENA H 40.6–46.6: Arttico + régua no CRM com automação ─────────
 var ring = S(c, 540, 880, "Anel logo"); var rgg = G(ring); aEll(rgg, 420, 420); strk(rgg, CY, 6);
@@ -464,30 +472,30 @@ ring.inPoint = 40.7; ring.outPoint = 42.2;
 key(T(ring).property("Scale"), [[40.7, [40, 40]], [41.6, [150, 150]]]); key(T(ring).property("Opacity"), [[40.7, 100], [41.6, 0]]);
 var lg2 = c.layers.add(logo); lg2.name = "Logo Arttico"; T(lg2).property("Position").setValue([540, 880]); T(lg2).property("Scale").setValue([120, 120]);
 anim(lg2, 40.7, 42.2, { a: "pop", d: 0.5 });
-txt("Follow-up vira", 70, WH, 540, 800, 42.2, 46.6, { style: "SemiBold" });
-txt("régua no CRM", 116, CY, 540, 930, 42.4, 46.6);
+txt("Follow-up vira", 70, WH, CX, HY - 50, 42.2, 46.6, { style: "SemiBold" });
+txt("régua no CRM", 116, CY, CX, HY + 80, 42.4, 46.6);
 var ru = S(c, 0, 0, "Régua");
-var rug = G(ru); aPath(rug, [[110, 1260], [970, 1260]]); strk(rug, CY2, 8); trim(rug, 42.9, 43.6);
+var rug = G(ru); aPath(rug, [[90, 1240], [910, 1240]]); strk(rug, CY2, 8); trim(rug, 42.9, 43.6);
 var ticks = S(c, 0, 0, "Marcas régua");
-for (var tx = 0; tx <= 20; tx++) { var tg = G(ticks); aRect(tg, 4, tx % 5 === 0 ? 46 : 24, 2, 110 + tx * 43, 1260 + (tx % 5 === 0 ? 34 : 24)); fill(tg, CY2, 70); }
+for (var tx = 0; tx <= 20; tx++) { var tg = G(ticks); aRect(tg, 4, tx % 5 === 0 ? 46 : 24, 2, 90 + tx * 41, 1240 + (tx % 5 === 0 ? 34 : 24)); fill(tg, CY2, 70); }
 anim(ru, 42.9, 46.6, { a: "fade" }); anim(ticks, 43.2, 46.6, { a: "fade" });
 var nodes = [[icDoc(), "dia 0", 40], [icChat(), "dia 2", 45], [icBell(), "dia 5", 42], [icPerson(), "dia 7", 45]];
-var nx2 = [150, 420, 690, 960];
+var nx2 = [140, 380, 620, 860];
 for (var nd = 0; nd < 4; nd++) {
-  place(nodeIcon(nodes[nd][0], nodes[nd][2]), nx2[nd], 1160, 43.2 + nd * 0.4, 46.6, { s: 62 });
-  txt(nodes[nd][1], 38, CY2, nx2[nd], 1370, 43.3 + nd * 0.4, 46.6, { style: "SemiBold" });
+  place(nodeIcon(nodes[nd][0], nodes[nd][2]), nx2[nd], 1140, 43.2 + nd * 0.4, 46.6, { s: 62 });
+  txt(nodes[nd][1], 38, CY2, nx2[nd], 1340, 43.3 + nd * 0.4, 46.6, { style: "SemiBold" });
 }
-var pulse = S(c, 150, 1260, "Pulso"); var pg2 = G(pulse); aEll(pg2, 44, 44); fill(pg2, WH);
+var pulse = S(c, 140, 1240, "Pulso"); var pg2 = G(pulse); aEll(pg2, 44, 44); fill(pg2, WH);
 var pg3 = G(pulse); aEll(pg3, 80, 80); fill(pg3, CY, 35);
 pulse.inPoint = 44.6; pulse.outPoint = 46.6;
-key(T(pulse).property("Position"), [[44.6, [150, 1260]], [46.2, [960, 1260]]]);
+key(T(pulse).property("Position"), [[44.6, [140, 1240]], [46.2, [860, 1240]]]);
 key(T(pulse).property("Opacity"), [[44.6, 0], [44.75, 100], [46.3, 100], [46.6, 0]]);
-place(icBolt(), 540, 1560, 44.7, 46.6, { s: 62 });
-txt("tudo automático", 44, WH, 540, 1700, 44.9, 46.6, { style: "SemiBold" });
+place(icBolt(), CXL, 1430, 44.7, 46.6, { s: 52 });
+txt("tudo automático", 42, WH, CXL, 1545, 44.9, 46.6, { style: "SemiBold" });
 
 // ───────── CENA I 46.7–51.4: pilha de orçamentos parados ─────────
-txt("Quantos orçamentos", 84, WH, 540, 800, 46.8, 51.4);
-var px = [470, 610, 520, 650, 450, 570], py = [1470, 1450, 1400, 1380, 1340, 1300], rt = [-12, 9, -4, 15, -9, 4];
+txt("Quantos orçamentos", 84, WH, CX, HY, 46.8, 51.4);
+var px = [430, 570, 480, 610, 410, 530], py = [1400, 1380, 1330, 1310, 1270, 1230], rt = [-12, 9, -4, 15, -9, 4];
 for (var dk = 0; dk < 6; dk++) {
   var td0 = 47.0 + dk * 0.22;
   var dl = place(icDoc(), px[dk], 1000, td0, 51.4, { s: 60, a: "fade", d: 0.2 });
@@ -495,9 +503,9 @@ for (var dk = 0; dk < 6; dk++) {
   key(T(dl).property("Rotation"), [[td0, 0], [td0 + 0.4, rt[dk]]]);
   key(T(dl).property("Opacity"), [[49.0, 100], [49.4, 55]]);
 }
-txt("estão parados", 92, CY, 540, 910, 48.9, 51.4);
-place(icClock(GR), 880, 1250, 49.0, 51.4, { s: 50 });
-txt("sem 2ª tentativa?", 70, WH, 540, 1700, 49.7, 51.4);
+txt("estão parados", 92, CY, CX, HY + 110, 48.9, 51.4);
+place(icClock(GR), 820, 1260, 49.0, 51.4, { s: 50 });
+txt("sem 2ª tentativa?", 64, WH, CXL, 1545, 49.7, 51.4);
 
 // ───────── vídeo + PiP acima do motion ─────────
 v.moveToBeginning(); m.moveToBeginning(); pb.moveToBeginning();
@@ -522,22 +530,54 @@ function selo(str, y, tin, tout, icon, iS, size) {
   if (icon) return place(icon, pl, y, tin - 0.1, tout, { s: iS || 62 });
 }
 // C: desiste no 1º silêncio
-selo("desiste no 1º silêncio", 200, 21.9, 23.7, icFlag());
+selo("desiste no 1º silêncio", 340, 21.9, 23.7, icFlag());
 // F: humor do vendedor
-selo("humor do vendedor", 200, 34.5, 36.3, icFace(34.8, 35.2, 35.6));
+selo("humor do vendedor", 340, 34.5, 36.3, icFace(34.8, 35.2, 35.6));
 // J: CTA — limpo: SÓ o botão "Link na bio" (sem logo no topo, sem pílula extra tipo "agende uma conversa")
-var ripple = S(c, 905, 1745, "Toque"); var rpg = G(ripple); aEll(rpg, 120, 120); strk(rpg, WH, 8);
+var ripple = S(c, 790, 1470, "Toque"); var rpg = G(ripple); aEll(rpg, 120, 120); strk(rpg, WH, 8);
 ripple.inPoint = 52.9; ripple.outPoint = DUR + 0.3;
-T(ripple).property("Scale").expression = "var k=((time-52.9)*1.3)%1; [60+k*140, 60+k*140]";
+T(ripple).property("Scale").expression = "var k=((time-52.9)*1.3)%1; [60+k*110, 60+k*110]";
 T(ripple).property("Opacity").expression = "var k=((time-52.9)*1.3)%1; 100*(1-k)";
-var btn = S(c, 540, 1660, "Botão CTA"); var btg = G(btn); aRect(btg, 760, 170, 85); fill(btg, CY);
+var btn = S(c, CXL, 1440, "Botão CTA"); var btg = G(btn); aRect(btg, 740, 170, 85); fill(btg, CY);   // caixa de baixo da área segura (até y 1525, x 130–870)
 anim(btn, 52.3, DUR + 0.3, { a: "pop", d: 0.5 });
 key(T(btn).property("Scale"), [[53.0, [100, 100]], [53.6, [105, 105]], [54.2, [100, 100]], [54.8, [105, 105]]]);
-txt("Link na bio", 80, BG, 540, 1688, 52.4, DUR + 0.3, { a: "pop" });
+txt("Link na bio", 80, BG, CXL, 1468, 52.4, DUR + 0.3, { a: "pop" });
 ripple.moveToBeginning();
-var hand = S(c, 905, 1745, "Dedo"); var hg = G(hand); aEll(hg, 70, 70); fill(hg, WH, 90);
+var hand = S(c, 790, 1470, "Dedo"); var hg = G(hand); aEll(hg, 70, 70); fill(hg, WH, 90);
 hand.inPoint = 52.8; hand.outPoint = DUR + 0.3;
 T(hand).property("Scale").expression = "var k=((time-52.9)*1.3)%1; k<0.15? [80,80] : [100,100]";
+
+// ───────── REVISÃO: área segura do Reels ─────────
+// Comp "Revisão Reels" = vídeo final + zonas proibidas em vermelho. Use SÓ para render-frame de conferência;
+// o render final é sempre da comp principal (sem as zonas).
+var rv = p.items.addComp("Revisão Reels", W, H, 1, DUR, FPS);
+var rvl = rv.layers.add(c); rvl.startTime = 0;
+function zona(x, y, w, h, nome) { var z = S(rv, x + w / 2, y + h / 2, nome); var zg = G(z); aRect(zg, w, h, 0); fill(zg, [1, 0.15, 0.2], 35); }
+zona(0, 0, W, SAFE.t, "Topo: Reels + câmera");
+zona(0, SAFE.b, W, H - SAFE.b, "Base: usuário, legenda, áudio");
+zona(SAFE.rLow, SAFE.yLow, W - SAFE.rLow, SAFE.b - SAFE.yLow, "Direita: curtir/comentar/enviar");
+zona(SAFE.r, SAFE.t, W - SAFE.r, SAFE.yLow - SAFE.t, "Margem direita");
+zona(0, SAFE.t, SAFE.l, SAFE.b - SAFE.t, "Margem esquerda");
+
+// checagem automática: todo texto do comp principal precisa caber na área segura enquanto aparece
+function foraDaArea(x0, y0, x1, y1) {
+  if (x0 < SAFE.l || y0 < SAFE.t || y1 > SAFE.b) return true;
+  return x1 > ((y1 > SAFE.yLow) ? SAFE.rLow : SAFE.r);
+}
+var avisos = 0;
+for (var li = 1; li <= c.numLayers; li++) {
+  var L2 = c.layer(li), st2 = null;
+  try { st2 = L2.property("Source Text"); } catch (e) {}
+  if (!st2) continue;
+  for (var tt = L2.inPoint + 0.6; tt < L2.outPoint - 0.3; tt += 0.5) {
+    var rc = null; try { rc = L2.sourceRectAtTime(tt, false); } catch (e) {}
+    if (!rc) break;
+    var ps = vat(T(L2).property("Position"), tt), sc2 = vat(T(L2).property("Scale"), tt)[0] / 100;
+    var x0 = ps[0] + rc.left * sc2, y0 = ps[1] + rc.top * sc2, x1 = x0 + rc.width * sc2, y1 = y0 + rc.height * sc2;
+    if (foraDaArea(x0, y0, x1, y1)) { writeLn("AVISO área segura: \"" + L2.name + "\" em " + tt.toFixed(1) + "s -> [" + Math.round(x0) + "," + Math.round(y0) + " a " + Math.round(x1) + "," + Math.round(y1) + "]"); avisos++; break; }
+  }
+}
+writeLn("checagem área segura: " + (avisos ? avisos + " aviso(s)" : "ok"));
 
 c.workAreaStart = 0; c.workAreaDuration = DUR;
 writeLn("layers: " + c.numLayers + " comps: " + p.numItems);
