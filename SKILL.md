@@ -31,7 +31,7 @@ O estilo acima é pensado pra vídeos curtos (até ~1 min30). Em vídeos de **3 
 3. **O que merece motion:** conceito que precisa ser visualizado (processo, passo a passo, comparação, número, lista), dado ou estatística, história com personagens/marcas. Explicação simples, opinião e conversa ficam em tela cheia.
 4. **Selos animados** (ícone + frase curta) continuam valendo nos momentos de impacto em tela cheia, mas poucos e espaçados.
 5. **Estrutura:** 0–5 s tela cheia (igual ao estilo normal) → tela cheia por padrão → janelas de motion pontuais → CTA final em tela cheia (~4 s, igual ao estilo normal).
-6. **No `build.jsx`:** o array `cuts` fica com poucas janelas `PIP` curtas (cada uma abre com `PIP` e fecha com `FULL`); o resto é `FULL`. Logo do topo, etiqueta e barra de progresso aparecem só dentro das janelas de motion. Use o mesmo `selo()` e os mesmos helpers.
+6. **No `build.jsx`:** o array `cuts` fica com poucas janelas `PIP` curtas (cada uma abre com `PIP` e fecha com `FULL`); o resto é `FULL`. Logo do topo e barra de progresso aparecem só dentro das janelas de motion. Use o mesmo `selo()` e os mesmos helpers.
 7. **Roteiro:** em vez de dividir a fala inteira em blocos, escolha primeiro as janelas (liste início, fim e o que vai ilustrar) e só então desenhe as cenas. Em caso de dúvida se um trecho merece motion, deixe em tela cheia.
 8. **Revisão:** gere frames só das janelas de motion e dos selos/CTA, mas confira também as transições PiP ↔ tela cheia.
 
@@ -47,7 +47,7 @@ O vídeo vai pro Instagram Reels, e a interface do app fica por cima dele. **Nen
 | Margens | x < 60 e x > 1020 | borda da tela |
 
 - **Área segura** = caixa de cima (x 60–1020, y 250–1100) + caixa de baixo (x 60–940, y 1100–1580). No `exemplo-build.jsx` isso está em `SAFE`, com os centros `CX` (540, caixa de cima) e `CXL` (500, caixa de baixo) e a linha de manchete `HY`. Use essas constantes, não coordenadas soltas.
-- **Layout padrão:** PiP (280 px) no canto superior direito **dentro** da área segura (topo em y 270), logo + etiqueta à esquerda dele, barra de progresso no topo da área segura à esquerda do PiP (**nunca no rodapé**), manchete em `HY` (850), conteúdo da cena entre y ~950 e 1560 centrado em `CXL`.
+- **Layout padrão:** PiP (280 px) no canto superior direito **dentro** da área segura (topo em y 270), logo à esquerda dele (**sem título do vídeo ou etiqueta embaixo do logo**), barra de progresso no topo da área segura à esquerda do PiP (**nunca no rodapé**), manchete em `HY` (850), conteúdo da cena entre y ~950 e 1560 centrado em `CXL`.
 - **Selos** da tela cheia em y ~340; **botão do CTA** em y ~1440 centrado em `CXL`.
 - Elementos que entram animados também não podem nascer nem passar pela coluna da direita ou pela base: faça-os surgir já na posição final (pop/fade) ou vir de dentro da área segura.
 - **Conferência:** o build imprime `checagem área segura: ok` ou um `AVISO área segura` por texto fora da área (mede o retângulo real do texto ao longo do tempo). Corrija todo aviso. Ícones e precomps não entram na checagem automática, então confira-os nos frames.
@@ -60,7 +60,7 @@ Se o projeto tiver `marca/design-guide.md` preenchido, ele tem prioridade. Senã
 - Fundo `#010030`, cards `#001145` / `#122461`, ciano `#38d7ff`, ciano claro `#a3e3f0`, branco; vermelho `#FF5566` só para "errado/riscado"
 - Fonte **Inter** (Bold/SemiBold/Medium), já embutida no EffectCraft
 - Fundo: solid navy + brilho ciano desfocado se movendo devagar + grade sutil (opacidade 4–6%)
-- Durante o motion: logo branco + tag pequena em caps com tracking à esquerda do PiP, barra de progresso fina no topo da área segura (ver "Área segura do Reels")
+- Durante o motion: só o logo branco à esquerda do PiP (**nunca** título do vídeo, tema ou etiqueta embaixo dele) e a barra de progresso fina no topo da área segura (ver "Área segura do Reels")
 - Logo: `assets/logo-arttico.png` (branco, fundo transparente)
 
 ## Fluxo

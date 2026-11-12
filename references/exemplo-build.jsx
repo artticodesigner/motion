@@ -364,10 +364,9 @@ for (var gy = 0; gy < 8; gy++) { var gq = G(grid); aRect(gq, W, 2, 0, 0, 720 + g
 for (var gx = 0; gx < 7; gx++) { var gq2 = G(grid); aRect(gq2, 2, 1300, 0, -540 + gx * 180, 1300); fill(gq2, CY, 4); }
 grid.moveToEnd(); glow.moveToEnd(); bgl.moveToEnd();
 
-// topo: logo + etiqueta + progresso (ficam por trás do vídeo; somem na tela cheia)
+// topo: logo + progresso (ficam por trás do vídeo; somem na tela cheia). SEM título/etiqueta embaixo do logo.
 var lg1 = c.layers.add(logo); lg1.name = "Logo topo"; T(lg1).property("Scale").setValue([55, 55]); T(lg1).property("Position").setValue([SAFE.l + 110, 340]);
 anim(lg1, 5.5, DUR, { a: "right" });
-txt("FOLLOW-UP QUE VENDE", 26, CY, SAFE.l + 8, 420, 5.7, DUR, { just: LEFT, tracking: 120, a: "right" });
 var PGW = PX - PW / 2 - 40 - SAFE.l;   // barra de progresso no topo da área segura, à esquerda do PiP (nunca no rodapé: lá fica a legenda do Reels)
 var prog = S(c, SAFE.l, SAFE.t + 14, "Progresso"); var prg = G(prog); var prr = aRect(prg, PGW, 8, 4); prr.property("Position").setValue([PGW / 2, 0]); fill(prg, CY);
 key(T(prog).property("Scale"), [[5.4, [0, 100]], [DUR, [100, 100]]]);
